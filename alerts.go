@@ -10,10 +10,10 @@ import (
 	"github.com/fatih/color"
 	mkr "github.com/mackerelio/mackerel-client-go"
 	"github.com/mackerelio/mkr/logger"
-	"gopkg.in/urfave/cli.v1"
+	"gopkg.in/urfave/cli.v2"
 )
 
-var commandAlerts = cli.Command{
+var commandAlerts = &cli.Command{
 	Name:  "alerts",
 	Usage: "Retrieve/Close alerts",
 	Description: `
@@ -21,24 +21,24 @@ var commandAlerts = cli.Command{
     Requests APIs under "/api/v0/alerts". See https://mackerel.io/api-docs/entry/alerts .
 `,
 	Action: doAlertsRetrieve,
-	Subcommands: []cli.Command{
+	Subcommands: []*cli.Command{
 		{
 			Name:        "list",
 			Usage:       "list alerts",
 			Description: "Shows alerts in human-readable format.",
 			Action:      doAlertsList,
 			Flags: []cli.Flag{
-				cli.StringSliceFlag{
+				&cli.StringSliceFlag{
 					Name:  "service, s",
 					Value: &cli.StringSlice{},
 					Usage: "Filters alerts by service. Multiple choices are allowed.",
 				},
-				cli.StringSliceFlag{
+				&cli.StringSliceFlag{
 					Name:  "host-status, S",
 					Value: &cli.StringSlice{},
 					Usage: "Filters alerts by status of each host. Multiple choices are allowed.",
 				},
-				cli.BoolTFlag{Name: "color, c", Usage: "Colorize output. default: true"},
+				&cli.BoolFlag{Name: "color, c", Usage: "Colorize output. default: true"},
 			},
 		},
 		{
@@ -47,8 +47,8 @@ var commandAlerts = cli.Command{
 			Description: "Closes alerts. Multiple alert IDs can be specified.",
 			Action:      doAlertsClose,
 			Flags: []cli.Flag{
-				cli.StringFlag{Name: "reason, r", Value: "", Usage: "Reason of closing alert."},
-				cli.BoolFlag{Name: "verbose, v", Usage: "Verbose output mode"},
+				&cli.StringFlag{Name: "reason, r", Value: "", Usage: "Reason of closing alert."},
+				&cli.BoolFlag{Name: "verbose, v", Usage: "Verbose output mode"},
 			},
 		},
 	},
@@ -256,7 +256,7 @@ func doAlertsList(c *cli.Context) error {
 				continue
 			}
 		}
-		fmt.Println(formatJoinedAlert(joinAlert, c.BoolT("color")))
+		fmt.Println(formatJoinedAlert(joinAlert, c.Bool("color")))
 	}
 	return nil
 }
@@ -266,13 +266,14 @@ func doAlertsClose(c *cli.Context) error {
 	argAlertIDs := c.Args()
 	reason := c.String("reason")
 
-	if len(argAlertIDs) < 1 {
+	if argAlertIDs.Len() < 1 {
 		cli.ShowCommandHelp(c, "alerts")
 		os.Exit(1)
 	}
 
 	client := newMackerelFromContext(c)
-	for _, alertID := range argAlertIDs {
+	for i := 0; i < argAlertIDs.Len(); i++ {
+		alertID := argAlertIDs.Get(i)
 		alert, err := client.CloseAlert(alertID, reason)
 		logger.DieIf(err)
 

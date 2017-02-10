@@ -12,11 +12,11 @@ import (
 	"github.com/Songmu/prompter"
 	mkr "github.com/mackerelio/mackerel-client-go"
 	"github.com/mackerelio/mkr/logger"
-	"gopkg.in/urfave/cli.v1"
+	"gopkg.in/urfave/cli.v2"
 )
 
 // Commands cli.Command object list
-var Commands = []cli.Command{
+var Commands = []*cli.Command{
 	commandStatus,
 	commandHosts,
 	commandCreate,
@@ -30,7 +30,7 @@ var Commands = []cli.Command{
 	commandAnnotations,
 }
 
-var commandStatus = cli.Command{
+var commandStatus = &cli.Command{
 	Name:  "status",
 	Usage: "Show the host",
 	Description: `
@@ -39,11 +39,11 @@ var commandStatus = cli.Command{
 `,
 	Action: doStatus,
 	Flags: []cli.Flag{
-		cli.BoolFlag{Name: "verbose, v", Usage: "Verbose output mode"},
+		&cli.BoolFlag{Name: "verbose, v", Usage: "Verbose output mode"},
 	},
 }
 
-var commandHosts = cli.Command{
+var commandHosts = &cli.Command{
 	Name:  "hosts",
 	Usage: "List hosts",
 	Description: `
@@ -52,24 +52,24 @@ var commandHosts = cli.Command{
 `,
 	Action: doHosts,
 	Flags: []cli.Flag{
-		cli.StringFlag{Name: "name, n", Value: "", Usage: "List hosts only matched with <name>"},
-		cli.StringFlag{Name: "service, s", Value: "", Usage: "List hosts only belonging to <service>"},
-		cli.StringSliceFlag{
+		&cli.StringFlag{Name: "name, n", Value: "", Usage: "List hosts only matched with <name>"},
+		&cli.StringFlag{Name: "service, s", Value: "", Usage: "List hosts only belonging to <service>"},
+		&cli.StringSliceFlag{
 			Name:  "role, r",
 			Value: &cli.StringSlice{},
 			Usage: "List hosts only belonging to <role>. Multiple choices are allowed. Required --service",
 		},
-		cli.StringSliceFlag{
+		&cli.StringSliceFlag{
 			Name:  "status, st",
 			Value: &cli.StringSlice{},
 			Usage: "List hosts only matched <status>. Multiple choices are allowed.",
 		},
-		cli.StringFlag{Name: "format, f", Value: "", Usage: "Output format template"},
-		cli.BoolFlag{Name: "verbose, v", Usage: "Verbose output mode"},
+		&cli.StringFlag{Name: "format, f", Value: "", Usage: "Output format template"},
+		&cli.BoolFlag{Name: "verbose, v", Usage: "Verbose output mode"},
 	},
 }
 
-var commandCreate = cli.Command{
+var commandCreate = &cli.Command{
 	Name:  "create",
 	Usage: "Create a new host",
 	Description: `
@@ -78,8 +78,8 @@ var commandCreate = cli.Command{
 `,
 	Action: doCreate,
 	Flags: []cli.Flag{
-		cli.StringFlag{Name: "status, st", Value: "", Usage: "Host status ('working', 'standby', 'maintenance')"},
-		cli.StringSliceFlag{
+		&cli.StringFlag{Name: "status, st", Value: "", Usage: "Host status ('working', 'standby', 'maintenance')"},
+		&cli.StringSliceFlag{
 			Name:  "roleFullname, R",
 			Value: &cli.StringSlice{},
 			Usage: "Multiple choices are allowed. ex. My-Service:proxy, My-Service:db-master",
@@ -87,7 +87,7 @@ var commandCreate = cli.Command{
 	},
 }
 
-var commandUpdate = cli.Command{
+var commandUpdate = &cli.Command{
 	Name:  "update",
 	Usage: "Update the host",
 	Description: `
@@ -96,19 +96,19 @@ var commandUpdate = cli.Command{
 `,
 	Action: doUpdate,
 	Flags: []cli.Flag{
-		cli.StringFlag{Name: "name, n", Value: "", Usage: "Update hostname."},
-		cli.StringFlag{Name: "displayName", Value: "", Usage: "Update displayName."},
-		cli.StringFlag{Name: "status, st", Value: "", Usage: "Update status."},
-		cli.StringSliceFlag{
+		&cli.StringFlag{Name: "name, n", Value: "", Usage: "Update hostname."},
+		&cli.StringFlag{Name: "displayName", Value: "", Usage: "Update displayName."},
+		&cli.StringFlag{Name: "status, st", Value: "", Usage: "Update status."},
+		&cli.StringSliceFlag{
 			Name:  "roleFullname, R",
 			Value: &cli.StringSlice{},
 			Usage: "Update rolefullname.",
 		},
-		cli.BoolFlag{Name: "overwriteRoles, o", Usage: "Overwrite roles instead of adding specified roles."},
+		&cli.BoolFlag{Name: "overwriteRoles, o", Usage: "Overwrite roles instead of adding specified roles."},
 	},
 }
 
-var commandThrow = cli.Command{
+var commandThrow = &cli.Command{
 	Name:  "throw",
 	Usage: "Post metric values",
 	Description: `
@@ -118,12 +118,12 @@ var commandThrow = cli.Command{
 `,
 	Action: doThrow,
 	Flags: []cli.Flag{
-		cli.StringFlag{Name: "host, H", Value: "", Usage: "Post host metric values to <hostID>."},
-		cli.StringFlag{Name: "service, s", Value: "", Usage: "Post service metric values to <service>."},
+		&cli.StringFlag{Name: "host, H", Value: "", Usage: "Post host metric values to <hostID>."},
+		&cli.StringFlag{Name: "service, s", Value: "", Usage: "Post service metric values to <service>."},
 	},
 }
 
-var commandFetch = cli.Command{
+var commandFetch = &cli.Command{
 	Name:  "fetch",
 	Usage: "Fetch latest metric values",
 	Description: `
@@ -132,7 +132,7 @@ var commandFetch = cli.Command{
 `,
 	Action: doFetch,
 	Flags: []cli.Flag{
-		cli.StringSliceFlag{
+		&cli.StringSliceFlag{
 			Name:  "name, n",
 			Value: &cli.StringSlice{},
 			Usage: "Fetch metric values identified with <name>. Required. Multiple choices are allowed. ",
@@ -140,7 +140,7 @@ var commandFetch = cli.Command{
 	},
 }
 
-var commandRetire = cli.Command{
+var commandRetire = &cli.Command{
 	Name:  "retire",
 	Usage: "Retire hosts",
 	Description: `
@@ -149,7 +149,7 @@ var commandRetire = cli.Command{
 `,
 	Action: doRetire,
 	Flags: []cli.Flag{
-		cli.BoolFlag{Name: "force", Usage: "Force retirement without confirmation."},
+		&cli.BoolFlag{Name: "force", Usage: "Force retirement without confirmation."},
 	},
 }
 
@@ -166,8 +166,10 @@ func assert(err error) {
 }
 
 func newMackerelFromContext(c *cli.Context) *mkr.Client {
-	conffile := c.GlobalString("conf")
-	apiBase := c.GlobalString("apibase")
+	conffile := c.String("conf")
+	apiBase := c.String("apibase")
+	// conffile := c.GlobalString("conf")
+	// apiBase := c.GlobalString("apibase")
 	apiKey := LoadApikeyFromEnvOrConfig(conffile)
 	if apiKey == "" {
 		logger.Log("error", `
@@ -241,7 +243,8 @@ OPTIONS:
 }
 
 func doStatus(c *cli.Context) error {
-	conffile := c.GlobalString("conf")
+	conffile := c.String("conf")
+	// conffile := c.GlobalString("conf")
 	argHostID := c.Args().Get(0)
 	isVerbose := c.Bool("verbose")
 
@@ -342,8 +345,9 @@ func doCreate(c *cli.Context) error {
 }
 
 func doUpdate(c *cli.Context) error {
-	conffile := c.GlobalString("conf")
-	argHostIDs := c.Args()
+	conffile := c.String("conf")
+	// conffile := c.GlobalString("conf")
+	argHostIDs := c.Args().Slice()
 	optName := c.String("name")
 	optDisplayName := c.String("displayName")
 	optStatus := c.String("status")
@@ -480,7 +484,7 @@ func doThrow(c *cli.Context) error {
 }
 
 func doFetch(c *cli.Context) error {
-	argHostIDs := c.Args()
+	argHostIDs := c.Args().Slice()
 	optMetricNames := c.StringSlice("name")
 
 	if len(argHostIDs) < 1 || len(optMetricNames) < 1 {
@@ -496,9 +500,9 @@ func doFetch(c *cli.Context) error {
 }
 
 func doRetire(c *cli.Context) error {
-	conffile := c.GlobalString("conf")
+	conffile := c.String("conf")
 	force := c.Bool("force")
-	argHostIDs := c.Args()
+	argHostIDs := c.Args().Slice()
 
 	if len(argHostIDs) < 1 {
 		argHostIDs = make([]string, 1)

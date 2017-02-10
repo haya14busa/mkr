@@ -5,23 +5,23 @@ import (
 	"runtime"
 
 	"github.com/mackerelio/mackerel-agent/config"
-	"gopkg.in/urfave/cli.v1"
+	"gopkg.in/urfave/cli.v2"
 )
 
 func main() {
-	app := cli.NewApp()
+	app := &cli.App{}
 	app.Name = "mkr"
 	app.Version = Version
 	app.Usage = "A CLI tool for mackerel.io"
-	app.Author = "Hatena Co., Ltd."
+	app.Authors = []*cli.Author{{Name: "Hatena Co., Ltd."}}
 	app.Commands = Commands
 	app.Flags = []cli.Flag{
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:  "conf",
 			Value: config.DefaultConfig.Conffile,
 			Usage: "Config file path",
 		},
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:  "apibase",
 			Value: config.DefaultConfig.Apibase,
 			Usage: "API Base",

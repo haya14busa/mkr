@@ -9,13 +9,13 @@ import (
 
 	"github.com/mackerelio/mackerel-client-go"
 	"github.com/mackerelio/mkr/logger"
-	"gopkg.in/urfave/cli.v1"
+	"gopkg.in/urfave/cli.v2"
 	"gopkg.in/yaml.v2"
 )
 
-var commandDashboards = cli.Command{
+var commandDashboards = &cli.Command{
 	Name: "dashboards",
-	Subcommands: []cli.Command{
+	Subcommands: []*cli.Command{
 		{
 			Name:  "generate",
 			Usage: "Generate custom dashboard",
@@ -25,7 +25,7 @@ var commandDashboards = cli.Command{
 `,
 			Action: doGenerateDashboards,
 			Flags: []cli.Flag{
-				cli.BoolFlag{Name: "print, p", Usage: "markdown is output in standard output."},
+				&cli.BoolFlag{Name: "print, p", Usage: "markdown is output in standard output."},
 			},
 		},
 	},
@@ -82,7 +82,7 @@ func (g graphDef) isExpressionGraph() bool {
 func (g graphDef) getBaseGraph(graphType string, height int, width int) (baseGraph baseGraph, err error) {
 	if g.isHostGraph() {
 		if g.GraphName == "" {
-			return nil, cli.NewExitError("graph_name is required for host graph.", 1)
+			return nil, cli.Exit("graph_name is required for host graph.", 1)
 		}
 
 		return hostGraph{
@@ -97,7 +97,7 @@ func (g graphDef) getBaseGraph(graphType string, height int, width int) (baseGra
 
 	if g.isServiceGraph() {
 		if g.GraphName == "" {
-			return nil, cli.NewExitError("graph_name is required for service graph.", 1)
+			return nil, cli.Exit("graph_name is required for service graph.", 1)
 		}
 
 		return serviceGraph{
@@ -112,7 +112,7 @@ func (g graphDef) getBaseGraph(graphType string, height int, width int) (baseGra
 
 	if g.isRoleGraph() {
 		if g.GraphName == "" {
-			return nil, cli.NewExitError("graph_name is required for role graph.", 1)
+			return nil, cli.Exit("graph_name is required for role graph.", 1)
 		}
 
 		return roleGraph{
@@ -138,7 +138,7 @@ func (g graphDef) getBaseGraph(graphType string, height int, width int) (baseGra
 		}, nil
 	}
 
-	return nil, cli.NewExitError("either host_id, service_name or query should be specified.", 1)
+	return nil, cli.Exit("either host_id, service_name or query should be specified.", 1)
 }
 
 type baseGraph interface {
@@ -349,10 +349,10 @@ func makeImageMarkdown(orgName string, g baseGraph) string {
 func doGenerateDashboards(c *cli.Context) error {
 	isStdout := c.Bool("print")
 
-	argFilePath := c.Args()
+	argFilePath := c.Args().Slice()
 	if len(argFilePath) < 1 {
 		cli.ShowCommandHelp(c, "generate")
-		return cli.NewExitError("specify a yaml file.", 1)
+		return cli.Exit("specify a yaml file.", 1)
 	}
 
 	buf, err := ioutil.ReadFile(argFilePath[0])
@@ -368,22 +368,22 @@ func doGenerateDashboards(c *cli.Context) error {
 	logger.DieIf(err)
 
 	if yml.ConfigVersion == "" {
-		return cli.NewExitError("config_version is required in yaml.", 1)
+		return cli.Exit("config_version is required in yaml.", 1)
 	}
 	if yml.ConfigVersion != "0.9" {
-		return cli.NewExitError(fmt.Sprintf("config_version %s is not suport.", yml.ConfigVersion), 1)
+		return cli.Exit(fmt.Sprintf("config_version %s is not suport.", yml.ConfigVersion), 1)
 	}
 	if yml.Title == "" {
-		return cli.NewExitError("title is required in yaml.", 1)
+		return cli.Exit("title is required in yaml.", 1)
 	}
 	if yml.URLPath == "" {
-		return cli.NewExitError("url_path is required in yaml.", 1)
+		return cli.Exit("url_path is required in yaml.", 1)
 	}
 	if yml.Format == "" {
 		yml.Format = "iframe"
 	}
 	if yml.Format != "iframe" && yml.Format != "image" {
-		return cli.NewExitError("graph_type should be 'iframe' or 'image'.", 1)
+		return cli.Exit("graph_type should be 'iframe' or 'image'.", 1)
 	}
 	if yml.Height == 0 {
 		yml.Height = 200
@@ -393,7 +393,7 @@ func doGenerateDashboards(c *cli.Context) error {
 	}
 
 	if yml.HostGraphFormat != nil && yml.GraphFormat != nil {
-		return cli.NewExitError("you cannot specify both 'graphs' and host_graphs'.", 1)
+		return cli.Exit("you cannot specify both 'graphs' and host_graphs'.", 1)
 	}
 
 	var markdown string
